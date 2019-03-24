@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Timeout:
+    Type: String
+    Description: The amount of time (in seconds) to wait for the copy operation.
+    Default: 600
+    AllowedPattern: '[0-9]{3}'
+
+Resources:
+  CopyToBucketLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns: [ 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole' ]
+      Policies:
+        - PolicyName: AllowReadOfStaticContent
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - 's3:ListBucket'
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:GetObjectAcl'
+                  - 's3:PutObjectAcl'
+                  - 's3:DeleteObject'
+                Resource: '*'
+                Effect: Allow
+
+  CopyToBucketFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: [ CopyToBucketLambdaRole ]
+    Properties:
+      CodeUri: ./functions
+      Description: Lambda to copy code from one bucket to another
+      Handler: index.handler
+      MemorySize: 128
+      Role: !GetAtt CopyToBucketLambdaRole.Arn
+      Runtime: nodejs8.10
+      Timeout: !Ref Timeout
+
+Outputs:
+  FunctionName:
+    Description: The name of the deployed function.
+    Value: !Ref CopyToBucketFunction
+  FunctionArn:
+    Description: The ARN of the deployed function.
+    Value: !GetAtt CopyToBucketFunction.Arn
