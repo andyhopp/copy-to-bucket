@@ -1,0 +1,14 @@
+{
+  "name": "copy-to-bucket",
+  "version": "1.0.0",
+  "description": "A CloudFormation custom resource for copying the content of one S3 bucket to another (handy for static content!).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.427.0"
+  }
+}
